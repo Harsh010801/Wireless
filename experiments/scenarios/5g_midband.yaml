@@ -1,0 +1,27 @@
+name: "Scenario E - 5G Mid-Band Microcell"
+description: "Sub-6 GHz 5G New Radio microcellular propagation at 3.5 GHz (C-Band)"
+frequency: 3500.0
+frequency_unit: "MHz"
+min_distance: 0.05
+max_distance: 5.0
+num_distance_points: 200
+distance_unit: "km"
+log_scale_distance: true
+tx_power_dbm: 38.0      # 6.3 Watts micro gNB
+tx_gain_dbi: 12.0       # Massive MIMO beamformed subarray gain
+rx_gain_dbi: 0.0        # 5G terminal
+system_loss_db: 2.0
+rx_sensitivity_dbm: -95.0
+ht: 15.0                # Lamp-post / street-furniture mount
+hr: 1.5                 # Pedestrian user
+environment: "urban"
+path_loss_exponent: 3.4
+shadowing_std_db: 7.0
+random_seed: 42
+models:
+  - "fspl"
+  - "two_ray"
+  - "log_distance"
+  - "cost231"
+  - "shadowing"
+

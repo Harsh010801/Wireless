@@ -1,0 +1,26 @@
+# Core Numerical & Scientific Computing
+numpy>=1.25.0
+pandas>=2.0.0
+scipy>=1.11.0
+
+# Plotting & Data Visualization
+matplotlib>=3.8.0
+seaborn>=0.13.0
+
+# Configuration & Utilities
+pyyaml>=6.0.0
+pydantic>=2.0.0
+
+# Testing & Quality Assurance
+pytest>=8.0.0
+pytest-cov>=4.1.0
+
+# Interactive Notebooks & Dashboard
+jupyter>=1.0.0
+ipykernel>=6.25.0
+streamlit>=1.30.0
+
+# Presentation & Hardcopy Generation
+python-pptx>=1.0.0
+reportlab>=4.0.0
+

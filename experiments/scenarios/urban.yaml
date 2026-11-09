@@ -1,0 +1,29 @@
+name: "Scenario B - Urban Macrocell"
+description: "Dense urban propagation at 1800 MHz (PCS/DCS band)"
+frequency: 1800.0
+frequency_unit: "MHz"
+min_distance: 0.1
+max_distance: 10.0
+num_distance_points: 200
+distance_unit: "km"
+log_scale_distance: true
+tx_power_dbm: 43.0      # 20 Watts
+tx_gain_dbi: 15.0       # Sector panel antenna
+rx_gain_dbi: 0.0        # Smartphone integrated antenna
+system_loss_db: 3.0
+rx_sensitivity_dbm: -100.0
+ht: 30.0                # Rooftop base station
+hr: 1.5                 # Pedestrian mobile
+environment: "urban"
+path_loss_exponent: 3.2
+shadowing_std_db: 8.0
+random_seed: 42
+models:
+  - "fspl"
+  - "two_ray"
+  - "log_distance"
+  - "okumura"
+  - "hata"
+  - "cost231"
+  - "shadowing"
+

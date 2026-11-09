@@ -1,0 +1,28 @@
+name: "Scenario A - Rural Macrocell"
+description: "Macrocellular propagation in open rural terrain at 900 MHz"
+frequency: 900.0
+frequency_unit: "MHz"
+min_distance: 0.1
+max_distance: 20.0
+num_distance_points: 200
+distance_unit: "km"
+log_scale_distance: true
+tx_power_dbm: 46.0      # 40 Watts macro base station
+tx_gain_dbi: 17.0       # High-gain directional panel
+rx_gain_dbi: 2.15       # Dipole whip antenna
+system_loss_db: 2.0
+rx_sensitivity_dbm: -105.0
+ht: 45.0                # 45-meter rural lattice tower
+hr: 1.5                 # 1.5-meter handheld terminal
+environment: "rural"
+path_loss_exponent: 2.3
+shadowing_std_db: 5.0
+random_seed: 42
+models:
+  - "fspl"
+  - "two_ray"
+  - "log_distance"
+  - "okumura"
+  - "hata"
+  - "shadowing"
+

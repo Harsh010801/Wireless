@@ -1,0 +1,26 @@
+name: "Scenario D - Indoor WLAN / Small Cell"
+description: "Indoor office and hall propagation at 2.4 GHz (Wi-Fi / Small Cell)"
+frequency: 2400.0
+frequency_unit: "MHz"
+min_distance: 1.0
+max_distance: 100.0
+num_distance_points: 150
+distance_unit: "m"
+log_scale_distance: true
+tx_power_dbm: 20.0      # 100 mW Wi-Fi Access Point
+tx_gain_dbi: 3.0        # Omni ceiling mount
+rx_gain_dbi: 0.0        # Laptop / Smartphone Wi-Fi antenna
+system_loss_db: 0.5
+rx_sensitivity_dbm: -85.0
+ht: 2.5                 # Ceiling mount AP
+hr: 1.0                 # Desk height user device
+environment: "indoor_obstructed"
+path_loss_exponent: 3.5
+shadowing_std_db: 4.0
+random_seed: 42
+models:
+  - "fspl"
+  - "two_ray"
+  - "log_distance"
+  - "shadowing"
+
