@@ -81,3 +81,4 @@ Since shadow fading in dB follows a zero-mean normal distribution with standard 
 - **EIRP (Effective Isotropic Radiated Power):** The hypothetical power that an ideal isotropic antenna would need to radiate to produce the peak signal intensity observed in the main beam of the actual transmitter antenna:
   $$\text{EIRP}(\text{dBm}) = P_t(\text{dBm}) + G_t(\text{dBi}) - L_{\text{cable}}(\text{dB})$$
 - In cellular networks, regulatory limits (FCC/TRAI) cap the maximum EIRP to prevent interference to neighboring cells.
+
