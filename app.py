@@ -144,8 +144,9 @@ for m_key in selected_models:
 # -------------------------------------------------------------
 # DASHBOARD TABS
 # -------------------------------------------------------------
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "📈 Path Loss & Received Power",
+    "🎬 Animated Simulation",
     "📊 Statistical Analysis",
     "📋 Model Comparison Matrix",
     "🎲 Shadowing & Outage Analysis",
@@ -184,8 +185,39 @@ with tab1:
         ax2.legend(fontsize=8, loc="lower left")
         st.pyplot(fig2)
 
-# TAB 2: Summary Stats
+# TAB 2: Animated Simulation
 with tab2:
+    st.subheader("🎬 Animated Signal Propagation & Curve Tracing")
+    gif_path = ROOT_DIR / "animated_path_loss.gif"
+    
+    col_a1, col_a2 = st.columns([3, 2])
+    with col_a1:
+        if gif_path.exists():
+            st.image(str(gif_path), caption="Live Progressive Curve Tracing (Free Space vs Okumura vs Hata)", use_container_width=True)
+        else:
+            st.info("Animated GIF not found. Run scripts/generate_animation.py to generate.")
+    with col_a2:
+        st.markdown(
+            """
+            ### 📡 Animation Highlights
+            - **Progressive Curve Drawing:** Visualizes signal decay from $1\\text{ km}$ to $20\\text{ km}$ across all three benchmark models.
+            - **Real-Time Divergence:** Watch the delta between Hata Urban and Free Space expand from $+34.9\\text{ dB}$ at $1\\text{ km}$ to $+54.7\\text{ dB}$ at $20\\text{ km}$.
+            - **Tip Tracker:** Moving points track the instantaneous path loss and received power at each step.
+            
+            #### Benchmark Readings (f = 900 MHz):
+            - **At 1 km:**
+              - Free Space: `91.5 dB`
+              - Okumura Open: `97.9 dB`
+              - Hata Urban: `126.4 dB`
+            - **At 20 km:**
+              - Free Space: `117.5 dB`
+              - Okumura Open: `143.7 dB`
+              - Hata Urban: `172.2 dB`
+            """
+        )
+
+# TAB 3: Summary Stats
+with tab3:
     st.subheader("Descriptive Summary Statistics Across Models")
     records = []
     for key in selected_models:
@@ -212,14 +244,14 @@ with tab2:
     csv_bytes = df_export.to_csv(index=False).encode("utf-8")
     st.download_button("📥 Download Simulation Data (CSV)", data=csv_bytes, file_name="simulation_results.csv", mime="text/csv")
 
-# TAB 3: Comparison Matrix
-with tab3:
+# TAB 4: Comparison Matrix
+with tab4:
     st.subheader("Formal Comparative Analysis Matrix")
     matrix_df = ModelComparator.get_comparison_table()
     st.dataframe(matrix_df, use_container_width=True)
 
-# TAB 4: Shadowing Analysis
-with tab4:
+# TAB 5: Shadowing Analysis
+with tab5:
     st.subheader("Log-Normal Shadow Fading & Outage Probability")
     col_s1, col_s2 = st.columns(2)
     shadow_std = col_s1.slider("Shadow Fading Std Dev sigma (dB)", min_value=1.0, max_value=14.0, value=6.0, step=0.5)
@@ -260,8 +292,8 @@ with tab4:
             """
         )
 
-# TAB 5: Link Budget Calculator
-with tab5:
+# TAB 6: Link Budget Calculator
+with tab6:
     st.subheader("Interactive RF Link Budget Calculator")
     eval_dist_km = st.slider("Select Target Distance (km)", min_value=float(min_d_km), max_value=float(max_d_km), value=float(min(3.0, max_d_km)), step=0.1)
 
