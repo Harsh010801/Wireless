@@ -267,3 +267,4 @@ for s_num, title, bullets, *img in slides_data:
 output_path = os.path.join(os.getcwd(), "Mini_Project_Presentation_15Slides.pptx")
 prs.save(output_path)
 print(f"[+] 15-Slide Presentation successfully saved at: {output_path}")
+
