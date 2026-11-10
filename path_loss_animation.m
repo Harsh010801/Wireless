@@ -103,3 +103,4 @@ for k = 1:length(d_fine)
 end
 
 fprintf('[+] Animation complete! All curves traced to 20 km.\n');
+

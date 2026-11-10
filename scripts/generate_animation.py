@@ -114,3 +114,4 @@ print(f'[*] Rendering {total_frames + 15} frames to {output_path}...')
 anim.save(output_path, writer='pillow', fps=12, dpi=120)
 print(f'[+] Animation saved: {output_path}')
 plt.close()
+
