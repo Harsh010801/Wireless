@@ -103,3 +103,4 @@ When $h_{te}$ doubles ($\log_{10}(2) \approx 0.30103$):
 - Slope term reduction at $d = 10\text{ km}$ ($\log_{10}(10) = 1$): $-6.55 \times 0.30103 \approx -1.97\text{ dB}$
 - **Total Path Loss Reduction:** Approximately **$6.13\text{ dB}$**.  
 Doubling the antenna tower height improves coverage and reduces path loss by over $6\text{ dB}$ (effectively quadrupling received signal power).
+
