@@ -35,53 +35,47 @@ export default function Navbar({ activeView, setActiveView }) {
         </button>
 
         {/* Centered Navigation Links */}
-        <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-[#374151]">
+        <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-[#374151]">
           <button
             onClick={() => scrollTo('models-section')}
-            className="hover:text-[#134729] transition"
+            className="hover:text-[#134729] transition whitespace-nowrap"
           >
             Models <span className="text-xs text-[#6B7280]">(Theory)</span>
           </button>
           <button
             onClick={() => scrollTo('steps-section')}
-            className="hover:text-[#134729] transition"
+            className="hover:text-[#134729] transition whitespace-nowrap"
           >
             How It Works <span className="text-xs text-[#6B7280]">(Pipeline)</span>
           </button>
           <button
             onClick={() => scrollTo('wave-animation')}
-            className="hover:text-[#134729] transition"
+            className="hover:text-[#134729] transition whitespace-nowrap"
           >
             Wave Motion <span className="text-xs text-[#6B7280]">(Animation)</span>
           </button>
           <button
             onClick={() => setActiveView('simulator')}
-            className={`transition ${
+            className={`transition whitespace-nowrap ${
               activeView === 'simulator' ? 'text-[#134729] font-bold' : 'hover:text-[#134729]'
             }`}
           >
             Simulator <span className="text-xs text-[#6B7280]">(Interactive Graphs)</span>
           </button>
-          <button
-            onClick={() => scrollTo('team-footer')}
-            className="hover:text-[#134729] transition"
-          >
-            Team <span className="text-xs text-[#6B7280]">(SRM CTECH)</span>
-          </button>
         </nav>
 
         {/* Action CTA Pills */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={() => scrollTo('wave-animation')}
-            className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold text-[#111827] hover:bg-black/5 transition"
+            className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold text-[#111827] hover:bg-black/5 transition whitespace-nowrap"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
             Demo Animation
           </button>
           <button
             onClick={() => setActiveView(activeView === 'simulator' ? 'landing' : 'simulator')}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold border border-[#134729]/30 bg-white hover:bg-[#A8EB12] hover:border-[#A8EB12] text-[#111827] shadow-sm transition-all duration-200"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold border border-[#134729]/30 bg-white hover:bg-[#A8EB12] hover:border-[#A8EB12] text-[#111827] shadow-sm transition-all duration-200 whitespace-nowrap"
           >
             <Sliders className="w-4 h-4" />
             {activeView === 'simulator' ? 'Back to Home (Landing)' : 'Open Simulator (Live Lab)'}
