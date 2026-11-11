@@ -23,6 +23,7 @@ import {
   Zap,
   Table2,
   Activity,
+  FileText,
 } from 'lucide-react';
 import {
   fetchSimulation,
@@ -205,6 +206,14 @@ export default function SimulatorStudio({ initialModelFocus }) {
             <Download className="w-3.5 h-3.5" />
             Export CSV (Spreadsheet Data)
           </button>
+          <a
+            href="/api/download-case-study"
+            download="Wireless_Propagation_Case_Study.docx"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#134729]/30 bg-white hover:bg-[#134729] hover:text-white text-[#111827] text-xs font-bold transition shadow-sm"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            Case Study Doc (.docx Download)
+          </a>
         </div>
       </div>
 

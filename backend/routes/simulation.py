@@ -5,7 +5,8 @@ import warnings
 from pathlib import Path
 from typing import Any, Dict, List
 import numpy as np
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse
 
 # Ensure src is discoverable
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
@@ -309,3 +310,17 @@ def evaluate_link_budget(req: LinkBudgetEvaluationRequest) -> Dict[str, Any]:
         "fade_margin_db": round(fade_margin_db, 2),
         "link_status": "SERVICE OK" if fade_margin_db > 0 else "OUTAGE RISK",
     }
+
+
+@router.get("/download-case-study")
+def download_case_study():
+    """Serve the generated Case_Study_Document.docx file for direct browser download."""
+    doc_path = ROOT_DIR / "Case_Study_Document.docx"
+    if not doc_path.exists():
+        raise HTTPException(status_code=404, detail="Case Study document not found")
+    return FileResponse(
+        path=str(doc_path),
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        filename="Wireless_Propagation_Case_Study.docx",
+    )
+

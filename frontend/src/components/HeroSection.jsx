@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Play, Wifi, Activity, Radio } from 'lucide-react';
+import { ArrowRight, Play, Wifi, Activity, Radio, FileText } from 'lucide-react';
 
 export default function HeroSection({ onLaunchSimulator, onWatchAnimation }) {
   const tags = [
@@ -42,7 +42,7 @@ export default function HeroSection({ onLaunchSimulator, onWatchAnimation }) {
           </p>
 
           {/* CTA Buttons with bracket explanations */}
-          <div className="flex flex-wrap items-center gap-4 pt-2">
+          <div className="flex flex-wrap items-center gap-3.5 pt-2">
             <button
               onClick={onLaunchSimulator}
               className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-[#A8EB12] hover:bg-[#9ae009] text-[#0B2E1A] font-bold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all"
@@ -50,6 +50,15 @@ export default function HeroSection({ onLaunchSimulator, onWatchAnimation }) {
               Launch Live Simulator (Interactive Graphs)
               <ArrowRight className="w-4 h-4" />
             </button>
+
+            <a
+              href="/api/download-case-study"
+              download="Wireless_Propagation_Case_Study.docx"
+              className="inline-flex items-center gap-2 px-5 py-3.5 rounded-full border border-[#134729]/25 bg-white hover:bg-[#134729] hover:text-white text-[#111827] font-bold text-sm shadow-sm transition-all"
+            >
+              <FileText className="w-4 h-4" />
+              Case Study Doc (.docx Download)
+            </a>
 
             <button
               onClick={onWatchAnimation}
