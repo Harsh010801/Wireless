@@ -17,7 +17,7 @@ export default function Footer({ onLaunchSimulator }) {
             </div>
             <p className="text-sm text-white/70 max-w-md leading-relaxed">
               Academic simulation platform for{' '}
-              <strong className="text-white">21CSE458T — Wireless and Mobile Communication</strong>{' '}
+              <strong className="text-white">Wireless and Mobile Communication</strong>{' '}
               (B.Tech CSE, 7th Semester), Department of Computing Technologies, SRM Institute of
               Science &amp; Technology.
             </p>
@@ -73,3 +73,4 @@ export default function Footer({ onLaunchSimulator }) {
     </footer>
   );
 }
+

@@ -772,7 +772,7 @@ export default function SimulatorStudio({ initialModelFocus }) {
           {activeTab === 'benchmark' && benchmarkData && (
             <div className="bg-white rounded-3xl p-6 border border-black/5 shadow-sm">
               <h3 className="font-extrabold text-lg text-[#111827] mb-1">
-                21CSE458T Course Benchmark Table{' '}
+                900 MHz Reference Benchmark Table{' '}
                 <span className="text-xs font-medium text-[#6B7280]">
                   (Exact 900 MHz, hₜ = 30 m, hᵣ = 1.5 m Values Matching MATLAB & Word Report)
                 </span>
@@ -844,3 +844,4 @@ export default function SimulatorStudio({ initialModelFocus }) {
     </div>
   );
 }
+

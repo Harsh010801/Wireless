@@ -26,7 +26,7 @@ export default function HeroSection({ onLaunchSimulator, onWatchAnimation }) {
         >
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#134729]/10 text-[#134729] text-xs font-bold tracking-wide">
             <span className="w-2 h-2 rounded-full bg-[#58b92c] animate-pulse" />
-            21CSE458T — WIRELESS & MOBILE COMMUNICATION (B.TECH CSE)
+            WIRELESS & MOBILE COMMUNICATION (SIMULATION STUDY)
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-[54px] font-extrabold text-[#111827] leading-[1.08] tracking-tight">
@@ -208,3 +208,4 @@ export default function HeroSection({ onLaunchSimulator, onWatchAnimation }) {
     </section>
   );
 }
+

@@ -6,7 +6,7 @@ export default function StandardsBar() {
     { name: 'ECL TOKYO', sub: 'Okumura (1968)' },
     { name: 'COST-231', sub: 'European 2 GHz Spec' },
     { name: 'MATLAB R2024b', sub: 'Matrix Benchmark' },
-    { name: 'SRM CTECH', sub: '21CSE458T Lab' },
+    { name: 'SRM CTECH', sub: 'Wireless Research Lab' },
   ];
 
   return (
@@ -27,3 +27,4 @@ export default function StandardsBar() {
     </section>
   );
 }
+

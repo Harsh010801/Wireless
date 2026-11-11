@@ -94,3 +94,4 @@ export default function FeaturesGrid({ onSelectModel }) {
     </section>
   );
 }
+

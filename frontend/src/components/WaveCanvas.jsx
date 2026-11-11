@@ -284,3 +284,4 @@ export default function WaveCanvas({ initialFreq = 900, initialHt = 30 }) {
     </section>
   );
 }
+

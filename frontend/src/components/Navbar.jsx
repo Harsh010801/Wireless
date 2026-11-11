@@ -28,8 +28,8 @@ export default function Navbar({ activeView, setActiveView }) {
             <span className="font-extrabold text-xl tracking-tight text-[#111827] block leading-none">
               WAVEPULSE<span className="text-[#58b92c]">RF</span>
             </span>
-            <span className="text-[11px] font-medium text-[#6B7280]">
-              21CSE458T Propagation Lab
+            <span className="text-[11px] font-medium text-[#6B7280] whitespace-nowrap">
+              Signal Propagation Lab
             </span>
           </div>
         </button>
@@ -91,3 +91,4 @@ export default function Navbar({ activeView, setActiveView }) {
     </header>
   );
 }
+
