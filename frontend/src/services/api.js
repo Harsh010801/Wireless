@@ -31,3 +31,4 @@ export async function evaluateLinkBudget(payload) {
   if (!res.ok) throw new Error('Failed to compute link budget');
   return res.json();
 }
+

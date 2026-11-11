@@ -10,3 +10,4 @@ start "WavePulse Frontend (React + Vite)" cmd /k "npm run dev"
 timeout /t 4 >nul
 start http://localhost:5173
 echo Done! Open http://localhost:5173 in your browser.
+

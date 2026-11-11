@@ -42,3 +42,4 @@ def health_check():
             {"name": "Tamanna Singh", "reg_no": "RA2311003011570"},
         ],
     }
+

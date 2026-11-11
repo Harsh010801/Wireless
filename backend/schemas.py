@@ -35,3 +35,4 @@ class LinkBudgetEvaluationRequest(BaseModel):
     rx_sensitivity_dbm: float = Field(-100.0)
     ht_m: float = Field(30.0)
     hr_m: float = Field(1.5)
+
