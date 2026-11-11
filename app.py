@@ -166,6 +166,7 @@ section[data-testid="stSidebar"] span { color: #cbd5e1 !important; }
 
 /* ── Hide streamlit default branding ── */
 #MainMenu {visibility: hidden;} footer {visibility: hidden;}
+header[data-testid="stHeader"] { background: transparent !important; }
 
 /* ── Pulse Animation ── */
 @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 5px rgba(56,189,248,0.3); } 50% { box-shadow: 0 0 20px rgba(56,189,248,0.6); } }
@@ -560,10 +561,10 @@ with tab1:
             ax2.plot(distances_km, pr_dict[key], label=MODEL_LABELS.get(key, key),
                      color=MODEL_PALETTE.get(key), linestyle=MODEL_STYLES.get(key, "-"), lw=2.0)
         ax2.axhline(rx_sens_dbm, color="#f87171", linestyle="--", lw=1.5,
-                     label=f"⚠️ Rx Sensitivity Threshold ({rx_sens_dbm:.0f} dBm)")
+                     label=f"Rx Sensitivity Threshold ({rx_sens_dbm:.0f} dBm)")
         ax2.set_xscale("log")
         style_dark_axes(fig2, ax2,
-                        title=f"Received Power vs Distance  (Pₜ = {tx_power_dbm:.0f} dBm, Gₜ = {tx_gain_dbi:.0f} dBi)",
+                        title=f"Received Power vs Distance  (Pt = {tx_power_dbm:.0f} dBm, Gt = {tx_gain_dbi:.0f} dBi)",
                         xlabel="Distance", ylabel="Received Power",
                         xlabel_hint="km, logarithmic scale",
                         ylabel_hint="dBm — power at mobile phone")
@@ -591,29 +592,138 @@ with tab1:
 with tab2:
     st.markdown("""
     <div class="section-header">
-        <h3>🎬 Animated Signal Propagation & Curve Tracing</h3>
-        <p class="hint">Watch the path loss curves draw themselves from 1 km to 20 km, showing how models diverge with increasing distance</p>
+        <h3>🎬 Animated Signal Propagation & Real-Time Wave Simulation</h3>
+        <p class="hint">Live motion-graphics visualization of electromagnetic waves radiating from the tower (synced with your sidebar settings) + progressive path loss curve tracing</p>
     </div>
     """, unsafe_allow_html=True)
+
+    # Interactive HTML5 Canvas Wave Propagation Animation synced with sidebar parameters
+    import streamlit.components.v1 as components
+    live_wave_html = f"""
+    <div style="background:#0f172a; border:1px solid rgba(56,189,248,0.25); border-radius:16px; padding:16px; font-family:Inter, sans-serif; color:#e2e8f0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div>
+                <strong style="font-size:15px; color:#38bdf8;">🗼 Live Electromagnetic Wavefront Simulation</strong>
+                <span style="font-size:12px; color:#94a3b8; margin-left:10px;">
+                    (Synced: f = {freq_mhz:.0f} MHz | hₜ = {ht_m:.0f} m | hᵣ = {hr_m:.1f} m | Max d = {max_d_km:.1f} km)
+                </span>
+            </div>
+            <span style="background:rgba(34,197,94,0.2); color:#4ade80; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700;">● LIVE MOTION</span>
+        </div>
+        <canvas id="waveSim" style="width:100%; height:240px; border-radius:10px; background:#090d16; display:block;"></canvas>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:12px; color:#94a3b8;">
+            <div>
+                <span style="color:#38bdf8;">🔵 Blue Arc: Free Space (Longest Reach)</span> &nbsp;|&nbsp;
+                <span style="color:#4ade80;">🟢 Green Arc: Okumura Open</span> &nbsp;|&nbsp;
+                <span style="color:#f87171;">🔴 Red Arc: Hata Urban (Attenuated by Buildings)</span>
+            </div>
+            <div id="liveMetricReadout" style="font-family:monospace; color:#facc15; font-weight:bold;">Loading...</div>
+        </div>
+    </div>
+    <script>
+        const cvs = document.getElementById('waveSim');
+        const ctx = cvs.getContext('2d');
+        const freq = {freq_mhz};
+        const ht = {ht_m};
+        const hr = {hr_m};
+        const maxD = {max_d_km};
+        let t = 0;
+        let pulses = [];
+
+        function fspl(d) {{ return 20*Math.log10(Math.max(d,0.01)) + 20*Math.log10(freq) + 32.44; }}
+        function hata(d) {{
+            const a = (1.1*Math.log10(freq)-0.7)*hr - (1.56*Math.log10(freq)-0.8);
+            return 69.55 + 26.16*Math.log10(freq) - 13.82*Math.log10(Math.max(ht,1)) - a + (44.9 - 6.55*Math.log10(Math.max(ht,1)))*Math.log10(Math.max(d,0.01));
+        }}
+
+        function draw() {{
+            const rect = cvs.getBoundingClientRect();
+            if (cvs.width !== rect.width) {{ cvs.width = rect.width; cvs.height = rect.height; }}
+            const w = cvs.width, h = cvs.height;
+            ctx.clearRect(0, 0, w, h);
+
+            // Sky & Ground
+            const grad = ctx.createLinearGradient(0, 0, 0, h*0.78);
+            grad.addColorStop(0, '#090d16'); grad.addColorStop(1, '#1e293b');
+            ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h*0.78);
+            ctx.fillStyle = '#0f172a'; ctx.fillRect(0, h*0.78, w, h*0.22);
+
+            const baseLine = h * 0.78;
+            const txX = 65;
+            const towerH = Math.min(ht * 1.8 + 40, h * 0.62);
+            const txY = baseLine - towerH;
+
+            // Buildings (Urban Clutter)
+            const blds = [0.22, 0.30, 0.39, 0.48, 0.58, 0.68, 0.78, 0.88];
+            blds.forEach((bx, idx) => {{
+                const x = w * bx;
+                const bh = 35 + ((idx * 23) % 45);
+                ctx.fillStyle = '#1e293b';
+                ctx.strokeStyle = '#334155';
+                ctx.fillRect(x, baseLine - bh, 32, bh);
+                ctx.strokeRect(x, baseLine - bh, 32, bh);
+            }});
+
+            // Spawn signal pulses
+            if (t % 35 === 0) pulses.push({{ r: 0 }});
+            pulses = pulses.filter(p => p.r < w * 1.1);
+            pulses.forEach(p => {{
+                p.r += 2.6;
+                const a = Math.max(0, 1 - p.r / (w * 0.95));
+                // Free Space Wave
+                ctx.beginPath(); ctx.arc(txX, txY, p.r, -0.45, 0.45);
+                ctx.strokeStyle = `rgba(56, 189, 248, ${{a * 0.75}})`; ctx.lineWidth = 2.5; ctx.stroke();
+                // Okumura Wave
+                ctx.beginPath(); ctx.arc(txX, txY, p.r * 0.72, -0.45, 0.45);
+                ctx.strokeStyle = `rgba(74, 222, 128, ${{a * 0.75}})`; ctx.lineWidth = 2.5; ctx.stroke();
+                // Hata Urban Wave
+                ctx.beginPath(); ctx.arc(txX, txY, p.r * 0.46, -0.45, 0.45);
+                ctx.strokeStyle = `rgba(248, 113, 113, ${{a * 0.85}})`; ctx.lineWidth = 2.5; ctx.stroke();
+            }});
+
+            // Tower Mast
+            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(txX - 10, baseLine); ctx.lineTo(txX, txY); ctx.lineTo(txX + 10, baseLine); ctx.stroke();
+            ctx.beginPath(); ctx.arc(txX, txY, 5, 0, Math.PI*2); ctx.fillStyle = '#ef4444'; ctx.fill();
+
+            // Moving Mobile User
+            const prog = (t % 400) / 400;
+            const rxX = txX + 40 + prog * (w - txX - 100);
+            const curD = Math.max(0.1, prog * maxD);
+            ctx.fillStyle = '#38bdf8'; ctx.fillRect(rxX - 6, baseLine - 22, 12, 20);
+            ctx.fillStyle = '#0f172a'; ctx.fillRect(rxX - 4, baseLine - 19, 8, 12);
+
+            ctx.fillStyle = '#e2e8f0'; ctx.font = 'bold 12px monospace'; ctx.textAlign = 'center';
+            ctx.fillText(`📱 ${{curD.toFixed(1)}} km`, rxX, baseLine + 16);
+
+            const curFS = fspl(curD);
+            const curHT = hata(curD);
+            document.getElementById('liveMetricReadout').textContent =
+                `d = ${{curD.toFixed(1)}} km | FSPL: ${{curFS.toFixed(1)}} dB | Hata: ${{curHT.toFixed(1)}} dB`;
+
+            t++;
+            requestAnimationFrame(draw);
+        }}
+        requestAnimationFrame(draw);
+    </script>
+    """
+    components.html(live_wave_html, height=330)
 
     gif_path = ROOT_DIR / "animated_path_loss.gif"
 
     col_a1, col_a2 = st.columns([3, 2])
     with col_a1:
         if gif_path.exists():
-            st.image(str(gif_path), caption="Progressive curve tracing: Blue = Free Space (lowest loss), Green = Okumura (moderate), Red = Hata Urban (highest loss)", use_container_width=True)
+            st.image(str(gif_path), caption="Progressive curve tracing: Blue = Free Space (lowest loss), Green = Okumura (moderate), Red = Hata Urban (highest loss)", width="stretch")
         else:
             st.info("⚠️ Animated GIF not found. Run `python scripts/generate_animation.py` to generate.")
     with col_a2:
         st.markdown("""
         <div class="info-banner">
-            <strong>📡 What This Animation Shows:</strong><br><br>
-            The three curves draw themselves simultaneously from <code>d = 1 km</code> to <code>d = 20 km</code>
-            at <code>f = 900 MHz</code> (GSM cellular band).<br><br>
-            <strong>🔵 Blue Curve (Free Space):</strong> Theoretical minimum loss. Assumes perfect vacuum line-of-sight. Grows at <code>20 dB/decade</code>.<br><br>
-            <strong>🟢 Green Curve (Okumura Open):</strong> Empirical model for rural/open terrain. Adds moderate terrain correction.<br><br>
-            <strong>🔴 Red Curve (Hata Urban):</strong> Realistic urban model with building clutter, rooftop diffraction. Grows at <code>35.22 dB/decade</code>.<br><br>
-            <strong>💡 Key Insight:</strong> The <em>gap between the curves expands</em> with distance — from <code>+34.9 dB</code> at 1 km to <code>+54.7 dB</code> at 20 km. This proves why idealized models cannot be used for real cellular network planning.
+            <strong>📡 What These Animations Show:</strong><br><br>
+            <strong>1. Top Wavefront Simulator:</strong> Shows how radio waves radiate outward from the tower at your exact sidebar settings. Notice how building clutter shrinks the urban reach (red arc) compared to free space (blue arc).<br><br>
+            <strong>2. Progressive Curve Tracing (Left):</strong> Draws all three curves simultaneously from <code>1 km</code> to <code>20 km</code> at <code>900 MHz</code>.<br><br>
+            <strong>💡 Key Insight:</strong> The gap between Hata Urban and Free Space widens from <code>+34.9 dB</code> at 1 km to <code>+54.7 dB</code> at 20 km.
         </div>
         """, unsafe_allow_html=True)
 
@@ -663,7 +773,7 @@ with tab3:
             "Mean Pr (dBm)": f"{np.mean(pr):.1f}",
         })
     df_stats = pd.DataFrame(records)
-    st.dataframe(df_stats, use_container_width=True)
+    st.dataframe(df_stats, width="stretch")
 
     # Downloadable CSV
     st.markdown("---")
@@ -699,7 +809,7 @@ with tab4:
     """, unsafe_allow_html=True)
 
     matrix_df = ModelComparator.get_comparison_table()
-    st.dataframe(matrix_df, use_container_width=True)
+    st.dataframe(matrix_df, width="stretch")
 
 
 # ── TAB 5: Shadowing & Outage Analysis ──
@@ -746,7 +856,7 @@ with tab5:
         ax_out.plot(distances_km, p_outage * 100.0, color="#ef4444", lw=2.5,
                      label=f"Outage Probability (σ = {shadow_std} dB)")
         ax_out.axhline(5.0, color="#22c55e", linestyle="--", lw=1.5,
-                        label="✅ Target: ≤ 5% Outage (95% Reliability)")
+                        label="Target: <= 5% Outage (95% Reliability)")
         ax_out.fill_between(distances_km, 0, p_outage * 100.0,
                              where=(p_outage * 100.0 <= 5.0), alpha=0.15, color="#22c55e")
         ax_out.fill_between(distances_km, 0, p_outage * 100.0,
