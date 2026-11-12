@@ -76,3 +76,4 @@ class TestMMWave3GPP:
             model.calculate_path_loss(-10.0, 28.0, distance_unit="m", frequency_unit="GHz")
         with pytest.raises(InvalidParameterError):
             model.calculate_path_loss(100.0, -5.0, distance_unit="m", frequency_unit="GHz")
+

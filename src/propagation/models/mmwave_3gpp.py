@@ -216,3 +216,4 @@ class CloseInMMWaveModel(PropagationModel):
         pl = fspl_1m + 10.0 * path_loss_exp * np.log10(d_ratio)
 
         return float(pl) if np.isscalar(distance) else pl
+
