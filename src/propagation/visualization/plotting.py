@@ -26,6 +26,10 @@ MODEL_PALETTE = {
     "hata": "#9467bd",          # Purple
     "cost231": "#8c564b",       # Brown
     "shadowing": "#e377c2",     # Pink/Magenta
+    "mmwave_umi_los": "#06b6d4",     # Cyan
+    "mmwave_umi_nlos": "#e11d48",    # Rose
+    "mmwave_transition": "#84cc16",  # Lime Green
+    "mmwave_ci": "#ca8a04",          # Amber
 }
 
 MODEL_LABELS = {
@@ -36,6 +40,10 @@ MODEL_LABELS = {
     "hata": "Okumura-Hata",
     "cost231": "COST-231 Hata",
     "shadowing": "Log-Normal Shadowing",
+    "mmwave_umi_los": "3GPP UMi LoS (mmWave)",
+    "mmwave_umi_nlos": "3GPP UMi NLoS (mmWave)",
+    "mmwave_transition": "LoS-NLoS Transition (IEEE Access)",
+    "mmwave_ci": "Close-In (CI) mmWave",
 }
 
 MODEL_STYLES = {
@@ -46,6 +54,10 @@ MODEL_STYLES = {
     "hata": "-",
     "cost231": "--",
     "shadowing": "-",
+    "mmwave_umi_los": "-",
+    "mmwave_umi_nlos": "--",
+    "mmwave_transition": "-.",
+    "mmwave_ci": ":",
 }
 
 

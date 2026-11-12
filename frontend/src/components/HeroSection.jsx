@@ -4,12 +4,14 @@ import { ArrowRight, Play, Wifi, Activity, Radio } from 'lucide-react';
 
 export default function HeroSection({ onLaunchSimulator, onWatchAnimation }) {
   const tags = [
-    'Free Space (Lower Bound)',
-    'Okumura (Tokyo Empirical)',
+    '3GPP mmWave (28/39/73 GHz)',
+    'IEEE Access (LoS-NLoS Transition)',
+    'Free Space (Friis Minimum)',
     'Hata Urban (Macrocell)',
-    'COST-231 (2 GHz PCS)',
-    'Two-Ray (Ground Bounce)',
-    'Log-Normal Shadowing (Stochastic)',
+    'COST-231 (2 GHz Extended)',
+    'Okumura (Tokyo Empirical)',
+    'Two-Ray Ground Bounce',
+    'Log-Normal Shadowing (σ Outage)',
   ];
 
   const miniBars = [38, 52, 46, 70, 64, 86, 78, 95, 88];
@@ -36,9 +38,9 @@ export default function HeroSection({ onLaunchSimulator, onWatchAnimation }) {
           </h1>
 
           <p className="text-base sm:text-lg text-[#4B5563] max-w-xl leading-relaxed">
-            Evaluate theoretical, empirical, and stochastic RF propagation models with
-            real-time numerical simulation — calculate path loss (dB), received power (dBm),
-            and cellular coverage effortlessly.
+            Evaluate legacy sub-6 GHz models (Okumura, Hata, COST-231) and modern
+            <span className="font-bold text-[#134729]"> 5G / 6G Millimeter-Wave (28–100 GHz) </span>
+            propagation with 3GPP TR 38.901 & IEEE Access 2026 statistical LoS–NLoS transition modeling.
           </p>
 
           {/* CTA Buttons with bracket explanations */}
@@ -65,7 +67,7 @@ export default function HeroSection({ onLaunchSimulator, onWatchAnimation }) {
           {/* Model Pill Tags Row */}
           <div className="pt-6 border-t border-black/10">
             <p className="text-xs font-semibold uppercase tracking-wider text-[#6B7280] mb-3">
-              7 Implemented Mathematical Models (Ready to Compare):
+              Sub-6 GHz & 5G/6G mmWave Models (All Calibrated & Ready to Compare):
             </p>
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (

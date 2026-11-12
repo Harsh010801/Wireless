@@ -23,6 +23,9 @@ from propagation.models import (
     HataModel,
     COST231HataModel,
     LogNormalShadowing,
+    MMWave3GPPModel,
+    CloseInMMWaveModel,
+    calculate_3gpp_los_probability,
 )
 from propagation.visualization.plotting import MODEL_LABELS
 
@@ -87,6 +90,38 @@ MODEL_METADATA = {
         "formula": "PL(d) = PL(d0) + 10·n·log10(d/d0) + Xσ",
         "shortDesc": "Adds zero-mean Gaussian random shadowing (Xσ in dB) for realistic spatial variability.",
     },
+    "mmwave_umi_los": {
+        "name": "3GPP UMi LoS (5G/6G mmWave)",
+        "color": "#06b6d4",
+        "strokeDash": "0",
+        "lineType": "Solid Line (Cyan)",
+        "formula": "PL = 32.4 + 21.0·log10(d_3D) + 20·log10(fc)",
+        "shortDesc": "3GPP TR 38.901 Urban Micro Street Canyon Line-of-Sight standard (0.5–100 GHz, σ = 4 dB).",
+    },
+    "mmwave_umi_nlos": {
+        "name": "3GPP UMi NLoS (5G/6G mmWave)",
+        "color": "#e11d48",
+        "strokeDash": "6 4",
+        "lineType": "Dashed Line (Rose)",
+        "formula": "PL = max(PL_LoS, 22.4 + 35.3·log10(d_3D) + 21.3·log10(fc))",
+        "shortDesc": "3GPP TR 38.901 Urban Micro Non-Line-of-Sight mmWave standard (0.5–100 GHz, σ = 7.82 dB).",
+    },
+    "mmwave_transition": {
+        "name": "LoS–NLoS Transition (IEEE Access 2026)",
+        "color": "#84cc16",
+        "strokeDash": "8 4",
+        "lineType": "Long Dash Line (Lime Green)",
+        "formula": "PL(d) = P_LoS(d)·PL_LoS + (1 − P_LoS(d))·PL_NLoS",
+        "shortDesc": "Statistical state transition mmWave model from Inam Ullah et al. (IEEE Access 2026, DOI: 10.1109/ACCESS.2026.3741615).",
+    },
+    "mmwave_ci": {
+        "name": "Close-In (CI) mmWave Model",
+        "color": "#ca8a04",
+        "strokeDash": "3 3",
+        "lineType": "Dotted Line (Amber)",
+        "formula": "PL_CI(d) = FSPL(1m) + 10·n·log10(d)",
+        "shortDesc": "Rappaport et al. 1-meter reference distance model widely used in 28/39/73 GHz 5G/6G measurements.",
+    },
 }
 
 
@@ -113,6 +148,10 @@ def _build_models(env: str, ht_m: float, hr_m: float, sigma_db: float) -> Dict[s
             environment="suburban" if env == "suburban" else "medium_city",
         ),
         "shadowing": LogNormalShadowing(n=3.0, sigma_db=sigma_db, seed=42),
+        "mmwave_umi_los": MMWave3GPPModel(mode="los", hb_default=ht_m, hm_default=hr_m),
+        "mmwave_umi_nlos": MMWave3GPPModel(mode="nlos", hb_default=ht_m, hm_default=hr_m),
+        "mmwave_transition": MMWave3GPPModel(mode="transition", hb_default=ht_m, hm_default=hr_m),
+        "mmwave_ci": CloseInMMWaveModel(n=2.1 if env == "rural" else (3.0 if env == "urban" else 2.5)),
     }
 
 
@@ -149,6 +188,8 @@ def run_simulation(req: SimulationRequest) -> Dict[str, Any]:
                 kwargs = {"ht": req.ht_m, "hr": req.hr_m}
             elif m_key in {"okumura", "hata", "cost231"}:
                 kwargs = {"hb": req.ht_m, "hm": req.hr_m, "hte": req.ht_m, "hre": req.hr_m}
+            elif m_key in {"mmwave_umi_los", "mmwave_umi_nlos", "mmwave_transition"}:
+                kwargs = {"hb": req.ht_m, "hm": req.hr_m}
             elif m_key == "shadowing":
                 kwargs = {"seed": 42}
 
@@ -198,11 +239,15 @@ def run_simulation(req: SimulationRequest) -> Dict[str, Any]:
             dtype=np.float64,
         )
 
+    d_m_arr = distances_km * 1000.0
+    p_los_arr = calculate_3gpp_los_probability(d_m_arr)
+
     for idx in range(len(distances_km)):
         row: Dict[str, Any] = {
             "distance_km": round(float(distances_km[idx]), 3),
             "outage_pct": round(float(outage_arr[idx]), 2),
             "rx_sensitivity_dbm": float(req.rx_sensitivity_dbm),
+            "p_los": round(float(p_los_arr[idx]), 4),
         }
         for m_key in pl_by_model:
             row[f"pl_{m_key}"] = round(float(pl_by_model[m_key][idx]), 2)
@@ -323,4 +368,70 @@ def download_case_study():
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         filename="Wireless_Propagation_Case_Study.docx",
     )
+
+
+@router.get("/download-viva-qa")
+def download_viva_qa():
+    """Serve the generated Viva_Questions_and_Explanations.docx file for direct browser download."""
+    doc_path = ROOT_DIR / "Viva_Questions_and_Explanations.docx"
+    if not doc_path.exists():
+        raise HTTPException(status_code=404, detail="Viva document not found")
+    return FileResponse(
+        path=str(doc_path),
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        filename="Viva_Questions_and_Explanations.docx",
+    )
+
+
+@router.get("/mmwave-transition-data")
+def get_mmwave_transition_data(
+    freq_ghz: float = 28.0,
+    min_dist_m: float = 5.0,
+    max_dist_m: float = 500.0,
+    points: int = 60,
+    hb: float = 10.0,
+    hm: float = 1.5,
+) -> Dict[str, Any]:
+    """
+    Generate Line-of-Sight probability and LoS-NLoS state transition curves
+    for mmWave frequencies based on Inam Ullah et al. (IEEE Access 2026).
+    """
+    dist_m = np.linspace(max(1.0, min_dist_m), max(50.0, max_dist_m), max(10, points))
+    model_los = MMWave3GPPModel(mode="los", hb_default=hb, hm_default=hm)
+    model_nlos = MMWave3GPPModel(mode="nlos", hb_default=hb, hm_default=hm)
+    model_trans = MMWave3GPPModel(mode="transition", hb_default=hb, hm_default=hm)
+    model_ci = CloseInMMWaveModel(n=2.1)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        pl_los = model_los.calculate_path_loss(dist_m, freq_ghz, distance_unit="m", frequency_unit="GHz")
+        pl_nlos = model_nlos.calculate_path_loss(dist_m, freq_ghz, distance_unit="m", frequency_unit="GHz")
+        pl_trans = model_trans.calculate_path_loss(dist_m, freq_ghz, distance_unit="m", frequency_unit="GHz")
+        pl_ci = model_ci.calculate_path_loss(dist_m, freq_ghz, distance_unit="m", frequency_unit="GHz")
+        p_los = calculate_3gpp_los_probability(dist_m)
+
+    rows = []
+    for i in range(len(dist_m)):
+        rows.append({
+            "distance_m": round(float(dist_m[i]), 1),
+            "p_los": round(float(p_los[i]), 4),
+            "p_nlos": round(1.0 - float(p_los[i]), 4),
+            "pl_los_db": round(float(pl_los[i]), 2),
+            "pl_nlos_db": round(float(pl_nlos[i]), 2),
+            "pl_transition_db": round(float(pl_trans[i]), 2),
+            "pl_ci_db": round(float(pl_ci[i]), 2),
+        })
+
+    return {
+        "carrier_freq_ghz": freq_ghz,
+        "citation": {
+            "title": "Statistical Path Loss Modeling of LoS–NLoS Transitions for mmWave Communications in Urban Environments",
+            "authors": "Inam Ullah, Hesham El-Sayed, Alexis A. Dowhuszko, Jyri Hämäläinen",
+            "journal": "IEEE Access",
+            "doi": "10.1109/ACCESS.2026.3741615",
+            "year": 2026,
+            "bands_analyzed": ["28 GHz (n257/n261)", "39 GHz (n260)", "60 GHz (V-band)", "73 GHz (6G sub-THz)"],
+        },
+        "rows": rows,
+    }
 

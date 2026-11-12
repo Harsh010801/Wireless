@@ -10,6 +10,11 @@ from propagation.models.okumura import OkumuraModel
 from propagation.models.hata import HataModel
 from propagation.models.cost231 import COST231HataModel
 from propagation.models.shadowing import LogNormalShadowing
+from propagation.models.mmwave_3gpp import (
+    MMWave3GPPModel,
+    CloseInMMWaveModel,
+    calculate_3gpp_los_probability,
+)
 
 __all__ = [
     "PropagationModel",
@@ -21,4 +26,7 @@ __all__ = [
     "HataModel",
     "COST231HataModel",
     "LogNormalShadowing",
+    "MMWave3GPPModel",
+    "CloseInMMWaveModel",
+    "calculate_3gpp_los_probability",
 ]

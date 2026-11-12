@@ -305,8 +305,48 @@ def build_viva_doc():
     add_viva_qa(
         doc, 20,
         "How did you verify that all mathematical formulas and unit conversions in your codebase are error-free?",
-        "We built an automated test suite of 32 unit tests using pytest covering unit conversions, Friis benchmarks, Two-Ray crossover slopes, Hata environmental ordering, COST-231 offsets, and reproducible seeded shadowing.",
-        "Running 'python -m pytest tests/' passes all 32/32 tests in ~1 second. Additionally, the MATLAB outputs (91.52 dB, 97.90 dB, 126.40 dB at 1 km; 117.55 dB, 143.73 dB, 172.23 dB at 20 km) match the Python engine to 2 decimal places."
+        "We built an automated test suite of 38 unit tests using pytest covering unit conversions, Friis benchmarks, Two-Ray crossover slopes, Hata environmental ordering, COST-231 offsets, reproducible seeded shadowing, and 3GPP mmWave LoS/NLoS transition physics.",
+        "Running 'python -m pytest tests/' passes all 38/38 tests in ~1.5 seconds. Additionally, the MATLAB outputs (91.52 dB, 97.90 dB, 126.40 dB at 1 km; 117.55 dB, 143.73 dB, 172.23 dB at 20 km) match the Python engine to 2 decimal places."
+    )
+
+    # ==============================================================
+    # SECTION E
+    # ==============================================================
+    add_section_header(doc, "SECTION E: 5G / 6G mmWAVE UPGRADE & IEEE ACCESS (2026) RESEARCH PAPER DEFENSE (Q21 – Q25)")
+
+    add_viva_qa(
+        doc, 21,
+        "What are the primary frequency bands used in 5G and 6G mmWave, and how do they differ from legacy sub-6 GHz bands?",
+        "5G mmWave uses Frequency Range 2 (FR2), specifically 28 GHz (bands n257/n261) and 39 GHz (band n260), while 6G research targets 73 GHz (E-band) and sub-THz up to 100 GHz. Unlike sub-6 GHz (900/1800 MHz) with multi-kilometer reach, mmWave signals suffer huge free-space losses and cannot penetrate solid walls.",
+        "At mmWave frequencies, wavelengths drop to millimeters (e.g. λ = 10.7 mm at 28 GHz; λ = 4.1 mm at 73 GHz). Path loss increases drastically with frequency (Friis factor 20·log10(f)), and concrete/glass attenuation exceeds 25–40 dB. Consequently, mmWave networks operate as Urban Microcells (UMi) with small cell radii (100–500 m) using massive MIMO beamforming."
+    )
+
+    add_viva_qa(
+        doc, 22,
+        "Explain the 3GPP TR 38.901 Urban Micro (UMi) Path Loss equations for LoS and NLoS states.",
+        "3GPP TR 38.901 standardizes UMi Street Canyon: PL_LoS(d, fc) = 32.4 + 21.0·log10(d_3D) + 20·log10(fc) with σ = 4.0 dB, and PL_NLoS(d, fc) = 22.4 + 35.3·log10(d_3D) + 21.3·log10(fc) with σ = 7.82 dB, where fc is in GHz and d_3D is in meters.",
+        "The 3D distance d_3D = sqrt(d_2D^2 + (h_BS - h_UT)^2) accounts for the height difference between the street-level base station (typical 10 m) and the mobile user (1.5 m). Notice the NLoS path loss exponent is 3.53 (vs 2.10 for LoS), meaning when a building blocks line-of-sight, the signal drops dramatically."
+    )
+
+    add_viva_qa(
+        doc, 23,
+        "Explain the key contribution of the IEEE Access 2026 research paper by Inam Ullah et al.",
+        "The paper ('Statistical Path Loss Modeling of LoS–NLoS Transitions for mmWave Communications in Urban Environments', IEEE Access, Oct 2026, DOI: 10.1109/ACCESS.2026.3741615) addresses the abrupt step-discontinuity between pure LoS and pure NLoS models in dense urban high-rise streets.",
+        "In real urban street canyons, mobile users frequently transition between LoS and NLoS behind building corners. The authors model the effective transition path loss as: PL_transition(d) = P_LoS(d)·PL_LoS(d) + (1 - P_LoS(d))·PL_NLoS(d). This smooth statistical transition model enables accurate handover triggering and beam tracking without false beam drops."
+    )
+
+    add_viva_qa(
+        doc, 24,
+        "What is the Line-of-Sight probability P_LoS(d) function in 3GPP TR 38.901, and why is 18 meters the cutoff?",
+        "In 3GPP UMi, for distance d_2D <= 18 m, P_LoS = 1.0 (guaranteed Line-of-Sight). For d_2D > 18 m, P_LoS(d) = (18 / d) + exp(-d / 36) * (1 - 18 / d), which decays smoothly toward 0 as distance grows.",
+        "18 meters corresponds to the typical average width of an urban street canyon plus sidewalks. Below 18 meters, the mobile terminal is physically in the same street block as the microcell pole antenna with direct unobstructed line-of-sight. Beyond 18 meters, intersection corners and oncoming vehicular clutter introduce obstruction probability."
+    )
+
+    add_viva_qa(
+        doc, 25,
+        "How is the mmWave extension integrated into your web application architecture?",
+        "We added MMWave3GPPModel and CloseInMMWaveModel in Python (src/propagation/models/mmwave_3gpp.py), supporting carrier frequencies from 0.5 GHz to 100 GHz, exposed via FastAPI routes (/api/simulate and /api/mmwave-transition-data).",
+        "On the React frontend, we added a dedicated '5G/6G mmWave & LoS-NLoS Transitions' interactive tab featuring dual live charts (Path Loss vs Distance and P_LoS Probability Decay), frequency band presets (28 GHz, 39 GHz, 60 GHz, 73 GHz), and real-time telemetry tables citing the IEEE Access 2026 paper."
     )
 
     out_path = ROOT_DIR / "Viva_Questions_and_Explanations.docx"
@@ -316,3 +356,4 @@ def build_viva_doc():
 
 if __name__ == "__main__":
     build_viva_doc()
+

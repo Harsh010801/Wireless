@@ -32,3 +32,9 @@ export async function evaluateLinkBudget(payload) {
   return res.json();
 }
 
+export async function fetchMmWaveTransition(freqGhz = 28.0) {
+  const res = await fetch(`${API_BASE}/mmwave-transition-data?freq_ghz=${freqGhz}`);
+  if (!res.ok) throw new Error('Failed to load mmWave transition data');
+  return res.json();
+}
+
