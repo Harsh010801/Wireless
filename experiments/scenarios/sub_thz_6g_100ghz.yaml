@@ -1,0 +1,26 @@
+name: "Scenario I - 6G Sub-THz / mmWave Boundary (100 GHz)"
+description: "High-frequency edge of 3GPP TR 38.901 Rel-19 at 100 GHz for extreme data-rate wireless hotspots"
+frequency: 100000.0
+frequency_unit: "MHz"
+min_distance: 0.005         # 5 meters
+max_distance: 0.5           # 500 meters
+num_distance_points: 200
+distance_unit: "km"
+log_scale_distance: true
+tx_power_dbm: 23.0          # 200 mW sub-THz transmitter
+tx_gain_dbi: 25.0           # Extreme beamforming array gain
+rx_gain_dbi: 10.0           # Narrowbeam steerable array
+system_loss_db: 4.0
+rx_sensitivity_dbm: -80.0
+ht: 10.0                    # Microcell pole height (m)
+hr: 1.5                     # Receiver height (m)
+environment: "urban"
+path_loss_exponent: 3.19
+shadowing_std_db: 7.82
+random_seed: 42
+models:
+  - "fspl"
+  - "three_gpp_umi_los"
+  - "three_gpp_umi_nlos"
+  - "ci"
+  - "abg"

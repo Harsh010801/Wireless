@@ -1,0 +1,27 @@
+name: "Scenario G - 6G Candidate FR3 Upper Mid-Band (13 GHz)"
+description: "FR3 (7-24 GHz) upper mid-band propagation evaluation for 6G coverage bridging using 3GPP UMa and UMi"
+frequency: 13000.0
+frequency_unit: "MHz"
+min_distance: 0.01
+max_distance: 5.0
+num_distance_points: 200
+distance_unit: "km"
+log_scale_distance: true
+tx_power_dbm: 43.0          # 20 W base station
+tx_gain_dbi: 18.0           # High-gain FR3 array
+rx_gain_dbi: 0.0
+system_loss_db: 2.0
+rx_sensitivity_dbm: -95.0
+ht: 25.0                    # Macro / upper micro tower height (m)
+hr: 1.5                     # Mobile handset (m)
+environment: "urban"
+path_loss_exponent: 3.53
+shadowing_std_db: 7.82
+random_seed: 42
+models:
+  - "fspl"
+  - "three_gpp_uma_los"
+  - "three_gpp_uma_nlos"
+  - "three_gpp_umi_los"
+  - "three_gpp_umi_nlos"
+  - "ci"

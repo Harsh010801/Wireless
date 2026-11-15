@@ -1,0 +1,26 @@
+name: "Scenario F - 5G Mid-Band (3.5 GHz C-Band)"
+description: "5G NR sub-6 GHz microcell deployment using 3GPP TR 38.901 and Close-In models"
+frequency: 3500.0
+frequency_unit: "MHz"
+min_distance: 0.01
+max_distance: 3.0
+num_distance_points: 200
+distance_unit: "km"
+log_scale_distance: true
+tx_power_dbm: 43.0          # 20 W micro gNB
+tx_gain_dbi: 15.0           # 5G beamforming array gain
+rx_gain_dbi: 0.0            # User equipment omni
+system_loss_db: 2.0
+rx_sensitivity_dbm: -95.0
+ht: 10.0                    # Base station height (m)
+hr: 1.5                     # User terminal height (m)
+environment: "urban"
+path_loss_exponent: 3.19
+shadowing_std_db: 7.82
+random_seed: 42
+models:
+  - "fspl"
+  - "three_gpp_umi_los"
+  - "three_gpp_umi_nlos"
+  - "ci"
+  - "abg"
