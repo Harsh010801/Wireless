@@ -224,8 +224,44 @@ def generate_pdf_report(output_pdf_path: Path):
         story.append(Image(str(fig_dir / "fig06_shadowing_distribution.png"), width=6.8*inch, height=3.0*inch))
         story.append(Spacer(1, 10))
 
+    story.append(PageBreak())
+
+    # Section 5: 5G/6G mmWave, 3GPP TR 38.901 & Transition Dynamics
+    story.append(Paragraph("5. 5G / 6G Millimeter-Wave & Sub-THz Propagation Dynamics (2026 Standards)", h1_style))
+    mmwave_text = (
+        "Modern wireless communication standards (3GPP Rel-19, 6G FR3 7-24 GHz, and mmWave bands up to 100 GHz) "
+        "deviate fundamentally from classical VHF/UHF models. Higher frequencies incur heightened diffraction loss, "
+        "necessitating dual-slope path loss with breakpoint distance d'BP, explicit distinction between Line-of-Sight (LoS) "
+        "and Non-Line-of-Sight (NLoS) channel states, and probabilistic LoS-NLoS state transition models (Inam Ullah et al., "
+        "IEEE Access 2026, DOI: 10.1109/ACCESS.2026.3741615)."
+    )
+    story.append(Paragraph(mmwave_text, body_style))
+    story.append(Spacer(1, 8))
+
+    if (fig_dir / "fig11_mmwave_vs_classical_28ghz.png").exists():
+        story.append(Paragraph("<b>Figure 5:</b> Path Loss vs. Distance at 28 GHz mmWave (Classical vs. 3GPP / CI / ABG)", h2_style))
+        story.append(Image(str(fig_dir / "fig11_mmwave_vs_classical_28ghz.png"), width=6.8*inch, height=3.6*inch))
+        story.append(Spacer(1, 10))
+
+    if (fig_dir / "fig12_broadband_pl_vs_frequency.png").exists():
+        story.append(Paragraph("<b>Figure 6:</b> Broadband Frequency Dependence (0.5 to 100 GHz) with Calibration Boundaries", h2_style))
+        story.append(Image(str(fig_dir / "fig12_broadband_pl_vs_frequency.png"), width=6.8*inch, height=3.6*inch))
+        story.append(Spacer(1, 10))
+
+    story.append(PageBreak())
+
+    if (fig_dir / "fig13_los_probability_and_mixture.png").exists():
+        story.append(Paragraph("<b>Figure 7:</b> LoS Probability Roll-Off & Stochastic LoS-NLoS State Transitions (IEEE Access 2026)", h2_style))
+        story.append(Image(str(fig_dir / "fig13_los_probability_and_mixture.png"), width=6.8*inch, height=4.2*inch))
+        story.append(Spacer(1, 10))
+
+    if (fig_dir / "fig14_benchmark_barchart_3_5ghz_and_28ghz.png").exists():
+        story.append(Paragraph("<b>Figure 8:</b> Benchmark Model Path Loss at 5G Mid-Band (3.5 GHz) vs mmWave (28 GHz)", h2_style))
+        story.append(Image(str(fig_dir / "fig14_benchmark_barchart_3_5ghz_and_28ghz.png"), width=6.8*inch, height=3.6*inch))
+        story.append(Spacer(1, 10))
+
     # Key Insights & Practical Takeaways
-    story.append(Paragraph("5. Critical Engineering Insights & Conclusions", h1_style))
+    story.append(Paragraph("6. Critical Engineering Insights & Conclusions", h1_style))
     conclusions_text = (
         "<b>1. Model Divergence:</b> Free Space (Friis) predicts the lowest path loss (77.5 - 117.5 dB) "
         "because it ignores multipath cancellation and building clutter. COST-231 Hata and Okumura "
@@ -234,9 +270,12 @@ def generate_pdf_report(output_pdf_path: Path):
         "decays at 40 dB/decade (n=4), whereas cellular empirical models decay at approximately 35 dB/decade (n=3.5).<br/>"
         "<b>3. Shadowing Fading Margins:</b> Under log-normal shadowing (sigma = 6-8 dB), maintaining 95% "
         "link reliability requires an extra fade margin of at least 1.96*sigma (12 to 16 dB) above receiver sensitivity.<br/>"
-        "<b>4. Empirical Limitations:</b> Classical Hata and Okumura formulations are strictly invalid above "
-        "1.5 - 2.0 GHz or below 1 km. Modern 5G C-Band (3.5 GHz) and mmWave deployments necessitate 3GPP TR 38.901 "
-        "or ray-tracing models rather than uncalibrated empirical extrapolations."
+        "<b>4. Failure of Classical Empirical Models at GHz:</b> Classical Hata and Okumura formulations are strictly invalid above "
+        "1.5 - 2.0 GHz or below 1 km. Extrapolating them to mmWave yields erroneous path losses differing by 30-50 dB from physics.<br/>"
+        "<b>5. 3GPP TR 38.901 & Close-In Models:</b> For 5G/6G deployments (0.5 to 100 GHz), 3GPP TR 38.901 and Close-In (CI) models "
+        "provide physically consistent path loss predictions anchored to a 1 m free-space reference, with robust parameter stability across bands.<br/>"
+        "<b>6. Stochastic LoS-NLoS Dynamics:</b> As demonstrated in Inam Ullah et al. (IEEE Access 2026), mobile corner-turning causes sharp "
+        "20+ dB step-transitions, requiring beam-tracking margins and probabilistic state transition modeling."
     )
     story.append(Paragraph(conclusions_text, body_style))
 
