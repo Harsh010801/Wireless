@@ -46,11 +46,15 @@ class CloseInModel(PropagationModel):
         use_cif: bool = False,
         b_cif: float = 0.0,
         f0_hz: float = 1e9,
+        **kwargs: Any,
     ):
         if preset and preset.lower() in self.PRESETS:
             p = self.PRESETS[preset.lower()]
             n = p["n"]
             sigma_db = p["sigma_db"]
+        elif "n_nlos" in kwargs:
+            n = kwargs["n_nlos"]
+            sigma_db = kwargs.get("sigma_nlos", 8.2)
 
         super().__init__(
             name="Close-In (CI) Model" if not use_cif else "Close-In Frequency-Dependent (CIF) Model",
@@ -99,7 +103,7 @@ class CloseInModel(PropagationModel):
         d_ratio = np.maximum(d_arr / self.d0_m, 1.0)
         pl = fspl_1m + 10.0 * ple * np.log10(d_ratio)
 
-        return float(pl) if np.isscalar(distance) else pl
+        return float(pl) if (np.isscalar(pl) or np.ndim(pl) == 0) else pl
 
 
 class FloatingInterceptABGModel(PropagationModel):
@@ -175,7 +179,7 @@ class FloatingInterceptABGModel(PropagationModel):
             + self.beta
             + 10.0 * self.gamma * np.log10(fc_safe)
         )
-        return float(pl) if np.isscalar(distance) else pl
+        return float(pl) if (np.isscalar(pl) or np.ndim(pl) == 0) else pl
 
     @classmethod
     def fit_from_data(

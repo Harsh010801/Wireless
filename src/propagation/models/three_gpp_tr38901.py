@@ -103,6 +103,7 @@ class ThreeGPPUMiModel(ThreeGPPTR38901Base):
         hut_default: float = 1.5,
         include_atmospheric_loss: bool = False,
         blockage_loss_db: float = 0.0,
+        **kwargs: Any,
     ):
         super().__init__(
             name=f"3GPP TR 38.901 UMi ({mode.upper()})",
@@ -110,8 +111,8 @@ class ThreeGPPUMiModel(ThreeGPPTR38901Base):
             description=f"3GPP TR 38.901 Urban Micro Street Canyon {mode.upper()} model (0.5–100 GHz).",
         )
         self.mode = mode.lower().strip()
-        self.hbs_default = hbs_default
-        self.hut_default = hut_default
+        self.hbs_default = float(kwargs.get("h_bs", kwargs.get("hbs", hbs_default)))
+        self.hut_default = float(kwargs.get("h_ut", kwargs.get("hut", hut_default)))
         self.include_atmospheric_loss = include_atmospheric_loss
         self.blockage_loss_db = blockage_loss_db
 
@@ -210,7 +211,7 @@ class ThreeGPPUMiModel(ThreeGPPTR38901Base):
         if blockage > 0:
             res = res + blockage
 
-        return float(res) if np.isscalar(distance) else res
+        return float(res) if (np.isscalar(res) or np.ndim(res) == 0) else res
 
 
 class ThreeGPPUMaModel(ThreeGPPTR38901Base):
@@ -251,6 +252,7 @@ class ThreeGPPUMaModel(ThreeGPPTR38901Base):
         hut_default: float = 1.5,
         include_atmospheric_loss: bool = False,
         blockage_loss_db: float = 0.0,
+        **kwargs: Any,
     ):
         super().__init__(
             name=f"3GPP TR 38.901 UMa ({mode.upper()})",
@@ -258,8 +260,8 @@ class ThreeGPPUMaModel(ThreeGPPTR38901Base):
             description=f"3GPP TR 38.901 Urban Macro {mode.upper()} model (0.5–100 GHz).",
         )
         self.mode = mode.lower().strip()
-        self.hbs_default = hbs_default
-        self.hut_default = hut_default
+        self.hbs_default = float(kwargs.get("h_bs", kwargs.get("hbs", hbs_default)))
+        self.hut_default = float(kwargs.get("h_ut", kwargs.get("hut", hut_default)))
         self.include_atmospheric_loss = include_atmospheric_loss
         self.blockage_loss_db = blockage_loss_db
 
@@ -362,7 +364,7 @@ class ThreeGPPUMaModel(ThreeGPPTR38901Base):
         if blockage > 0:
             res = res + blockage
 
-        return float(res) if np.isscalar(distance) else res
+        return float(res) if (np.isscalar(res) or np.ndim(res) == 0) else res
 
 
 class ThreeGPPInHOfficeModel(ThreeGPPTR38901Base):
@@ -443,4 +445,4 @@ class ThreeGPPInHOfficeModel(ThreeGPPTR38901Base):
         else:
             res = pl_nlos
 
-        return float(res) if np.isscalar(distance) else res
+        return float(res) if (np.isscalar(res) or np.ndim(res) == 0) else res
