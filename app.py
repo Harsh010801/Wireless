@@ -26,6 +26,12 @@ from propagation.models import (
     HataModel,
     COST231HataModel,
     LogNormalShadowing,
+    ThreeGPPUMiModel,
+    ThreeGPPUMaModel,
+    ThreeGPPInHOfficeModel,
+    CloseInModel,
+    FloatingInterceptABGModel,
+    StatisticalLoSNLoSTransitionModel,
 )
 from propagation.core.link_budget import LinkBudget
 from propagation.visualization.plotting import MODEL_PALETTE, MODEL_LABELS, MODEL_STYLES
@@ -236,13 +242,60 @@ st.sidebar.markdown("""
 
 st.sidebar.divider()
 
-# --- Carrier Frequency ---
-st.sidebar.markdown("**📻 Carrier Frequency** *(The radio wave frequency transmitted by the base station tower)*")
-freq_mhz = st.sidebar.number_input(
-    "Carrier Frequency (MHz)  [e.g., 900 = GSM, 1800 = LTE, 2400 = Wi-Fi]",
-    min_value=150.0, max_value=6000.0, value=1800.0, step=50.0,
-    help="Higher frequency → higher path loss. Standard bands: 900 MHz (GSM-900), 1800 MHz (LTE Band 3), 2100 MHz (3G UMTS), 2400 MHz (Wi-Fi 2.4G)."
+# --- Carrier Frequency & Band Selection ---
+st.sidebar.markdown("**📻 Carrier Frequency & Wireless Generation**")
+
+freq_unit = st.sidebar.radio("Frequency Unit", ["MHz (Sub-6 GHz)", "GHz (5G mmWave & 6G)"], horizontal=True)
+
+preset_choice = st.sidebar.selectbox(
+    "Standard Band Presets",
+    [
+        "Custom Manual Frequency",
+        "900 MHz — GSM Cellular (2G)",
+        "1800 MHz — LTE Band 3 (4G)",
+        "3.5 GHz (3500 MHz) — 5G NR C-Band",
+        "13 GHz (13000 MHz) — 6G Candidate FR3",
+        "28 GHz (28000 MHz) — 5G mmWave Street Canyon",
+        "73 GHz (73000 MHz) — 6G E-Band Sub-THz",
+        "100 GHz (100000 MHz) — 3GPP Rel-19 Upper Bound",
+    ],
+    index=1,
 )
+
+if preset_choice.startswith("900 MHz"):
+    default_freq_mhz = 900.0
+elif preset_choice.startswith("1800 MHz"):
+    default_freq_mhz = 1800.0
+elif preset_choice.startswith("3.5 GHz"):
+    default_freq_mhz = 3500.0
+elif preset_choice.startswith("13 GHz"):
+    default_freq_mhz = 13000.0
+elif preset_choice.startswith("28 GHz"):
+    default_freq_mhz = 28000.0
+elif preset_choice.startswith("73 GHz"):
+    default_freq_mhz = 73000.0
+elif preset_choice.startswith("100 GHz"):
+    default_freq_mhz = 100000.0
+else:
+    default_freq_mhz = 1800.0
+
+if "GHz" in freq_unit:
+    freq_ghz_in = st.sidebar.number_input(
+        "Carrier Frequency (GHz) [0.5 to 100 GHz]",
+        min_value=0.5, max_value=100.0,
+        value=float(default_freq_mhz / 1000.0),
+        step=0.5,
+        help="Standardized range for 3GPP TR 38.901 and mmWave Close-In models spans 0.5 to 100 GHz."
+    )
+    freq_mhz = float(freq_ghz_in * 1000.0)
+else:
+    freq_mhz = st.sidebar.number_input(
+        "Carrier Frequency (MHz) [150 to 100,000 MHz]",
+        min_value=150.0, max_value=100000.0,
+        value=float(default_freq_mhz),
+        step=50.0,
+        help="Higher frequency → higher path loss. Classical MHz models (Okumura, Hata) are valid <= 2 GHz."
+    )
 
 # --- Environment Preset ---
 st.sidebar.markdown("**🏙️ Environment Preset** *(Physical terrain and clutter type around the signal path)*")
@@ -265,105 +318,134 @@ st.sidebar.divider()
 st.sidebar.markdown("**📏 Distance Range** *(How far from the tower to compute signal decay)*")
 col_d1, col_d2 = st.sidebar.columns(2)
 min_d_km = col_d1.number_input(
-    "Min Distance (km) [Near tower]",
-    min_value=0.01, max_value=10.0, value=0.1, step=0.05,
-    help="Closest evaluation point to the base station. Typical minimum: 0.1 km (100 m) for macrocells."
+    "Min Distance (km)",
+    min_value=0.005, max_value=10.0, value=0.01 if freq_mhz >= 10000 else 0.1, step=0.01,
+    help="Closest evaluation point to the base station. (e.g. 0.01 km = 10 m for mmWave street microcell)."
 )
 max_d_km = col_d2.number_input(
-    "Max Distance (km) [Cell edge]",
-    min_value=0.5, max_value=100.0, value=10.0, step=1.0,
-    help="Farthest coverage boundary. Typical values: 5–20 km for macrocells, 0.5–2 km for microcells."
+    "Max Distance (km)",
+    min_value=0.05, max_value=100.0, value=1.0 if freq_mhz >= 10000 else 10.0, step=0.5,
+    help="Farthest coverage boundary. (e.g. 1.0 km for mmWave, 10-20 km for macrocell)."
 )
 num_points = st.sidebar.slider(
-    "Number of Evaluation Points  [Resolution of the plotted curves]",
+    "Number of Evaluation Points",
     min_value=50, max_value=500, value=200, step=25,
-    help="More points = smoother curves but slightly slower computation. 200 points is a good balance."
+    help="Resolution of the plotted curves. 200 points gives smooth logarithmic curves."
 )
 
 st.sidebar.divider()
 
 # --- Antenna & RF Link ---
-st.sidebar.markdown("**📶 Antenna & RF Link Budget** *(Transmitter power, antenna gains, and receiver sensitivity)*")
+st.sidebar.markdown("**📶 Antenna & RF Link Budget**")
 
 tx_power_dbm = st.sidebar.number_input(
-    "Transmit Power Pt (dBm)  [Base station RF output power]",
-    min_value=0.0, max_value=60.0, value=43.0, step=1.0,
-    help="RF power from the base station amplifier. 43 dBm = 20 Watts (standard macrocell tower). 30 dBm = 1 Watt (small cell). Measured at the transmitter output before antenna gain."
+    "Transmit Power Pt (dBm)",
+    min_value=0.0, max_value=60.0, value=43.0 if freq_mhz < 10000 else 30.0, step=1.0,
+    help="43 dBm = 20 W (macrocell). 30 dBm = 1 W (mmWave microcell)."
 )
 tx_gain_dbi = st.sidebar.number_input(
-    "Tx Antenna Gain Gt (dBi)  [Tower antenna directional gain]",
-    min_value=0.0, max_value=30.0, value=15.0, step=1.0,
-    help="How much the tower antenna focuses energy toward users. 15 dBi = typical 120° sector antenna. 0 dBi = omnidirectional. EIRP = Pt + Gt."
+    "Tx Antenna Gain Gt (dBi)",
+    min_value=0.0, max_value=35.0, value=15.0 if freq_mhz < 10000 else 22.0, step=1.0,
+    help="Array / beamforming gain. Massive MIMO / mmWave arrays provide 20-30 dBi gain."
 )
 rx_gain_dbi = st.sidebar.number_input(
-    "Rx Antenna Gain Gr (dBi)  [Mobile handset antenna gain]",
-    min_value=-5.0, max_value=15.0, value=0.0, step=1.0,
-    help="Mobile phone antenna gain. Typically 0 dBi (omnidirectional dipole). Negative values indicate lossy/inefficient antennas."
+    "Rx Antenna Gain Gr (dBi)",
+    min_value=-5.0, max_value=20.0, value=0.0 if freq_mhz < 10000 else 5.0, step=1.0,
+    help="Mobile handset antenna gain (0 dBi for omni dipole, 5+ dBi for mmWave patch array)."
 )
 system_loss_db = st.sidebar.number_input(
-    "System Losses Lsys (dB)  [Cable, connector & body losses]",
+    "System Losses Lsys (dB)",
     min_value=0.0, max_value=10.0, value=3.0, step=0.5,
-    help="Combined losses from coaxial cable, connectors, duplexer, and human body absorption. Typically 2–4 dB."
+    help="Cable, connector & body absorption losses."
 )
 rx_sens_dbm = st.sidebar.number_input(
-    "Rx Sensitivity Threshold (dBm)  [Minimum detectable signal]",
-    min_value=-130.0, max_value=-40.0, value=-100.0, step=5.0,
-    help="Minimum received power for the mobile to successfully decode the signal. -100 dBm = typical GSM. -104 dBm = LTE with coding gain. Below this → call drops / no service."
+    "Rx Sensitivity Threshold (dBm)",
+    min_value=-130.0, max_value=-40.0, value=-100.0 if freq_mhz < 10000 else -90.0, step=5.0,
+    help="Minimum detectable received power for reliable decoding."
 )
 
 st.sidebar.divider()
 
 # --- Antenna Heights ---
-st.sidebar.markdown("**🗼 Antenna Heights** *(Physical heights of the tower and mobile device)*")
+st.sidebar.markdown("**🗼 Antenna Heights**")
 col_h1, col_h2 = st.sidebar.columns(2)
 ht_m = col_h1.number_input(
     "Tower Height hₜ (m)",
-    min_value=1.5, max_value=500.0, value=30.0, step=5.0,
-    help="Base station antenna height above ground. 30 m = standard macro tower. Taller tower → better coverage, lower path loss."
+    min_value=1.5, max_value=500.0, value=25.0 if freq_mhz < 10000 else 10.0, step=1.0,
+    help="Base station antenna height (25-30m for macrocell, 10m for street canyon lamp-post)."
 )
 hr_m = col_h2.number_input(
     "Mobile Height hᵣ (m)",
     min_value=0.5, max_value=20.0, value=1.5, step=0.5,
-    help="Height of the user's handset. 1.5 m = person holding phone to ear. 1.0 m = phone in hand at waist. 3 m = vehicle-mounted."
+    help="Height of the user terminal (standard: 1.5 m)."
 )
 
 st.sidebar.divider()
 
 # --- Model Selection ---
-st.sidebar.markdown("**🧮 Active Propagation Models** *(Select which models to compute and compare)*")
-all_models = ["fspl", "two_ray", "log_distance", "okumura", "hata", "cost231", "shadowing"]
+st.sidebar.markdown("**🧮 Active Propagation Models (Classical & 2026 Standards)**")
+all_models = [
+    "fspl",
+    "two_ray",
+    "log_distance",
+    "okumura",
+    "hata",
+    "cost231",
+    "shadowing",
+    "three_gpp_umi_los",
+    "three_gpp_umi_nlos",
+    "three_gpp_uma_los",
+    "three_gpp_uma_nlos",
+    "three_gpp_inh_los",
+    "ci",
+    "abg",
+    "los_nlos_trans",
+]
 
-# Annotated model descriptions for multiselect
 MODEL_DESCRIPTIONS = {
-    "fspl": "📐 Free Space (Friis) — Theoretical LOS, no obstacles",
-    "two_ray": "🌊 Two-Ray Ground Reflection — Direct + ground-bounce interference",
-    "log_distance": "📊 Log-Distance — Configurable exponent n for any environment",
-    "okumura": "🗾 Okumura Model — Empirical, from Tokyo drive-test data (1968)",
-    "hata": "📱 Okumura-Hata — Closed-form standard for macrocellular planning",
-    "cost231": "🇪🇺 COST-231 Hata — Extended Hata for PCS bands (1.5–2.0 GHz)",
-    "shadowing": "🎲 Log-Normal Shadowing — Stochastic fading with random variation σ",
+    "fspl": "📐 Free Space (Friis) — Theoretical LOS baseline",
+    "two_ray": "🌊 Two-Ray Ground Reflection — Direct + ground bounce",
+    "log_distance": "📊 Log-Distance — Configurable exponent n",
+    "okumura": "🗾 Okumura Model — Empirical Tokyo (150–1920 MHz)",
+    "hata": "📱 Okumura-Hata — Standard Macro (150–1500 MHz)",
+    "cost231": "🇪🇺 COST-231 Hata — PCS/3G band (1500–2000 MHz)",
+    "shadowing": "🎲 Log-Normal Shadowing — Stochastic fading σ",
+    "three_gpp_umi_los": "⚡ 3GPP TR 38.901 UMi LoS — 5G/6G Street Canyon (0.5–100 GHz)",
+    "three_gpp_umi_nlos": "🏢 3GPP TR 38.901 UMi NLoS — 5G/6G Street Canyon NLoS",
+    "three_gpp_uma_los": "🗼 3GPP TR 38.901 UMa LoS — 5G/6G Urban Macrocell LoS",
+    "three_gpp_uma_nlos": "🏙️ 3GPP TR 38.901 UMa NLoS — 5G/6G Urban Macrocell NLoS",
+    "three_gpp_inh_los": "🏢 3GPP TR 38.901 InH — Indoor Mixed Office",
+    "ci": "🎯 Close-In (CI) Model — 1m Reference Distance (0.5–100 GHz)",
+    "abg": "📐 Floating-Intercept (ABG) — Multi-frequency fit",
+    "los_nlos_trans": "🔄 LoS-NLoS Transition (IEEE Access 2026) — Stochastic beam state switches",
 }
+
+default_selection = (
+    ["fspl", "two_ray", "hata", "cost231", "shadowing", "three_gpp_umi_los", "three_gpp_umi_nlos", "ci", "los_nlos_trans"]
+    if freq_mhz < 3000
+    else ["fspl", "three_gpp_umi_los", "three_gpp_umi_nlos", "three_gpp_uma_nlos", "ci", "abg", "los_nlos_trans"]
+)
 
 selected_models = st.sidebar.multiselect(
     "Select Models to Compare",
     options=all_models,
-    default=all_models,
+    default=default_selection,
     format_func=lambda k: MODEL_DESCRIPTIONS.get(k, MODEL_LABELS.get(k, k)),
-    help="Each model captures different physical effects. Select multiple models to see how their predictions diverge with distance. The spread between models reveals the 'reality gap' between theory and practice."
+    help="Select models to contrast classical MHz vs modern 5G/6G mmWave standards."
 )
 
 st.sidebar.divider()
 st.sidebar.markdown("""
 <div style="text-align:center; padding:8px; color:#475569; font-size:11px;">
-    🧪 <strong>SRM IST</strong> — Dept. of Computing Technologies<br>
+    🧪 <strong>SRM IST</strong> — Dept. of Electronics & Comm. Eng.<br>
     21CSE458T — Wireless & Mobile Communication<br>
-    B.Tech CSE, 7th Semester — AY 2025–2026
+    AY 2025–2026 | Harsh Yadav, Utkarsh Dabas, Tamanna Singh
 </div>
 """, unsafe_allow_html=True)
 
 
 # =====================================================================
-#  NUMERICAL COMPUTATION (unchanged logic)
+#  NUMERICAL COMPUTATION
 # =====================================================================
 distances_km = np.geomspace(min_d_km, max_d_km, num_points)
 
@@ -386,7 +468,17 @@ model_instances = {
     "hata": HataModel(hb_default=ht_m, hm_default=hr_m, environment="rural" if environment == "rural" else ("suburban" if environment == "suburban" else "urban_medium")),
     "cost231": COST231HataModel(hb_default=ht_m, hm_default=hr_m, environment="suburban" if environment == "suburban" else "medium_city"),
     "shadowing": LogNormalShadowing(n=3.0, sigma_db=6.0, seed=42),
+    "three_gpp_umi_los": ThreeGPPUMiModel(mode="los", hbs_default=ht_m, hut_default=hr_m),
+    "three_gpp_umi_nlos": ThreeGPPUMiModel(mode="nlos", hbs_default=ht_m, hut_default=hr_m),
+    "three_gpp_uma_los": ThreeGPPUMaModel(mode="los", hbs_default=ht_m, hut_default=hr_m),
+    "three_gpp_uma_nlos": ThreeGPPUMaModel(mode="nlos", hbs_default=ht_m, hut_default=hr_m),
+    "three_gpp_inh_los": ThreeGPPInHOfficeModel(mode="los", hbs_default=ht_m, hut_default=hr_m),
+    "ci": CloseInModel(n=3.19, sigma_db=8.2),
+    "abg": FloatingInterceptABGModel(),
+    "los_nlos_trans": StatisticalLoSNLoSTransitionModel(hbs_default=ht_m, hut_default=hr_m, seed=42),
 }
+
+validity_warnings = []
 
 for m_key in selected_models:
     model = model_instances[m_key]
@@ -397,6 +489,18 @@ for m_key in selected_models:
         kwargs = {"hb": ht_m, "hm": hr_m, "hte": ht_m, "hre": hr_m}
     elif m_key == "shadowing":
         kwargs = {"seed": 42}
+    elif m_key == "los_nlos_trans":
+        kwargs = {"mode": "expectation"}
+
+    # Check validity bounds
+    bounds = model.get_valid_range()
+    f_hz = freq_mhz * 1e6
+    if "frequency_hz" in bounds:
+        f_min, f_max = bounds["frequency_hz"]
+        if f_hz < f_min or f_hz > f_max:
+            validity_warnings.append(
+                f"⚠️ **{MODEL_LABELS.get(m_key, m_key)}**: Current frequency {freq_mhz/1000.0:.2f} GHz is OUTSIDE calibrated band [{f_min/1e9:.2f}, {f_max/1e9:.2f}] GHz. Predictions are mathematical extrapolations."
+            )
 
     pl_arr = model.calculate_path_loss(
         distance=distances_km,
@@ -474,6 +578,15 @@ with kpi5:
         <div class="unit">of {len(all_models)} available models</div>
         <div class="hint">Toggle models in the sidebar</div>
     </div>""", unsafe_allow_html=True)
+
+if validity_warnings:
+    with st.expander(f"⚠️ Model Validity & Frequency Range Notifications ({len(validity_warnings)} alert{'s' if len(validity_warnings) > 1 else ''})", expanded=True):
+        st.markdown(
+            "*(Classical models like Okumura and Hata are empirically measured for VHF/UHF below 2 GHz. "
+            "For 5G mid-band, mmWave, and 6G frequencies, use 3GPP TR 38.901 or Close-In models.)*"
+        )
+        for warn in validity_warnings:
+            st.warning(warn)
 
 
 # =====================================================================

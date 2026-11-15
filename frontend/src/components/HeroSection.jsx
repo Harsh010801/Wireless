@@ -4,14 +4,14 @@ import { ArrowRight, Play, Wifi, Activity, Radio } from 'lucide-react';
 
 export default function HeroSection({ onLaunchSimulator, onWatchAnimation }) {
   const tags = [
-    '3GPP mmWave (28/39/73 GHz)',
-    'IEEE Access (LoS-NLoS Transition)',
-    'Free Space (Friis Minimum)',
-    'Hata Urban (Macrocell)',
-    'COST-231 (2 GHz Extended)',
-    'Okumura (Tokyo Empirical)',
-    'Two-Ray Ground Bounce',
-    'Log-Normal Shadowing (σ Outage)',
+    '3GPP TR 38.901 UMi (Street Canyon)',
+    '3GPP TR 38.901 UMa (Urban Macro)',
+    '3GPP TR 38.901 InH (Indoor Office)',
+    'Close-In (CI) Model (1m Reference)',
+    'Close-In Freq-Dep (CIF)',
+    'Floating-Intercept (ABG Model)',
+    'IEEE Access 2026 (LoS–NLoS Transition)',
+    '5G mmWave & 6G Sub-THz (0.5–100 GHz)',
   ];
 
   const miniBars = [38, 52, 46, 70, 64, 86, 78, 95, 88];
@@ -38,9 +38,11 @@ export default function HeroSection({ onLaunchSimulator, onWatchAnimation }) {
           </h1>
 
           <p className="text-base sm:text-lg text-[#4B5563] max-w-xl leading-relaxed">
-            Evaluate legacy sub-6 GHz models (Okumura, Hata, COST-231) and modern
-            <span className="font-bold text-[#134729]"> 5G / 6G Millimeter-Wave (28–100 GHz) </span>
-            propagation with 3GPP TR 38.901 & IEEE Access 2026 statistical LoS–NLoS transition modeling.
+            Evaluate modern <span className="font-bold text-[#134729]">5G / 6G Millimeter-Wave & Sub-THz (0.5–100 GHz)</span> propagation models:
+            <span className="font-semibold text-[#111827]"> 3GPP TR 38.901 (UMi, UMa, InH)</span>,
+            <span className="font-semibold text-[#111827]"> Close-In (CI / CIF)</span>,
+            <span className="font-semibold text-[#111827]"> Floating-Intercept (ABG)</span>, and
+            <span className="font-semibold text-[#111827]"> IEEE Access 2026 Statistical LoS–NLoS Transition Modeling</span>.
           </p>
 
           {/* CTA Buttons with bracket explanations */}
@@ -67,7 +69,7 @@ export default function HeroSection({ onLaunchSimulator, onWatchAnimation }) {
           {/* Model Pill Tags Row */}
           <div className="pt-6 border-t border-black/10">
             <p className="text-xs font-semibold uppercase tracking-wider text-[#6B7280] mb-3">
-              Sub-6 GHz & 5G/6G mmWave Models (All Calibrated & Ready to Compare):
+              Latest 5G / 6G mmWave & Sub-THz Models (0.5–100 GHz Calibrated Standards):
             </p>
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (

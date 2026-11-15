@@ -79,6 +79,22 @@ def main():
     p10 = visualizer.plot_summary_comparison_chart(urban_sim, target_distance=3.0)
     generated_plots.append(("Fig 10", "Summary Comparison Bar Chart", p10.name))
 
+    # Plot 11: mmWave vs Classical at 28 GHz
+    p11 = visualizer.plot_mmwave_vs_classical_distance()
+    generated_plots.append(("Fig 11", "PL vs Distance (28 GHz mmWave)", p11.name))
+
+    # Plot 12: Broadband Frequency Sweep 0.5 - 100 GHz with cutoff zones
+    p12 = visualizer.plot_broadband_pl_vs_frequency(fixed_distance_m=200.0)
+    generated_plots.append(("Fig 12", "PL vs Frequency (0.5 - 100 GHz)", p12.name))
+
+    # Plot 13: LoS Probability and LoS-NLoS Transitions (IEEE Access 2026)
+    p13 = visualizer.plot_los_probability_and_mixture()
+    generated_plots.append(("Fig 13", "LoS Probability & State Transitions", p13.name))
+
+    # Plot 14: Benchmark Bar Chart at 3.5 GHz and 28 GHz
+    p14 = visualizer.plot_benchmark_barchart_5g_mmwave()
+    generated_plots.append(("Fig 14", "Benchmark Bar Chart (3.5 & 28 GHz)", p14.name))
+
     print("\n[4/4] Generation Complete! Summary:")
     print("-" * 70)
     print(f"{'Figure ID':<10} | {'Description':<35} | {'Filename':<30}")
@@ -86,7 +102,7 @@ def main():
     for fig_id, desc, filename in generated_plots:
         print(f"{fig_id:<10} | {desc:<35} | {filename:<30}")
     print("-" * 70)
-    print(f"All 10 figures successfully stored in: {output_dir}\n")
+    print(f"All 14 figures successfully stored in: {output_dir}\n")
 
 
 if __name__ == "__main__":
