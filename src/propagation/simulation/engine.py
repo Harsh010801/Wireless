@@ -17,6 +17,22 @@ from propagation.models.log_distance import LogDistancePathLoss
 from propagation.models.okumura import OkumuraModel
 from propagation.models.shadowing import LogNormalShadowing
 from propagation.models.two_ray import TwoRayGroundReflection
+from propagation.models.three_gpp_tr38901 import (
+    ThreeGPPUMiModel,
+    ThreeGPPUMaModel,
+    ThreeGPPInHOfficeModel,
+)
+from propagation.models.ci_abg import (
+    CloseInModel,
+    FloatingInterceptABGModel,
+)
+from propagation.models.los_nlos_transition import (
+    StatisticalLoSNLoSTransitionModel,
+)
+from propagation.models.mmwave_3gpp import (
+    MMWave3GPPModel,
+    CloseInMMWaveModel,
+)
 from propagation.simulation.scenario import ScenarioConfig
 
 
@@ -74,6 +90,20 @@ class SimulationEngine:
             "hata": HataModel,
             "cost231": COST231HataModel,
             "shadowing": LogNormalShadowing,
+            "three_gpp_umi_los": ThreeGPPUMiModel,
+            "three_gpp_umi_nlos": ThreeGPPUMiModel,
+            "three_gpp_uma_los": ThreeGPPUMaModel,
+            "three_gpp_uma_nlos": ThreeGPPUMaModel,
+            "three_gpp_inh_los": ThreeGPPInHOfficeModel,
+            "three_gpp_inh_nlos": ThreeGPPInHOfficeModel,
+            "ci": CloseInModel,
+            "cif": CloseInModel,
+            "abg": FloatingInterceptABGModel,
+            "los_nlos_trans": StatisticalLoSNLoSTransitionModel,
+            "mmwave_umi_los": MMWave3GPPModel,
+            "mmwave_umi_nlos": MMWave3GPPModel,
+            "mmwave_transition": MMWave3GPPModel,
+            "mmwave_ci": CloseInMMWaveModel,
         }
 
     def get_registered_keys(self) -> List[str]:
@@ -116,6 +146,36 @@ class SimulationEngine:
         elif key == "shadowing":
             n = scenario.path_loss_exponent if scenario.path_loss_exponent is not None else 3.0
             return cls(n=n, sigma_db=scenario.shadowing_std_db, seed=scenario.random_seed)
+        elif key == "three_gpp_umi_los":
+            return ThreeGPPUMiModel(mode="los", hbs_default=scenario.ht, hut_default=scenario.hr)
+        elif key == "three_gpp_umi_nlos":
+            return ThreeGPPUMiModel(mode="nlos", hbs_default=scenario.ht, hut_default=scenario.hr)
+        elif key == "three_gpp_uma_los":
+            return ThreeGPPUMaModel(mode="los", hbs_default=scenario.ht, hut_default=scenario.hr)
+        elif key == "three_gpp_uma_nlos":
+            return ThreeGPPUMaModel(mode="nlos", hbs_default=scenario.ht, hut_default=scenario.hr)
+        elif key == "three_gpp_inh_los":
+            return ThreeGPPInHOfficeModel(mode="los", hbs_default=scenario.ht, hut_default=scenario.hr)
+        elif key == "three_gpp_inh_nlos":
+            return ThreeGPPInHOfficeModel(mode="nlos", hbs_default=scenario.ht, hut_default=scenario.hr)
+        elif key == "ci":
+            n = scenario.path_loss_exponent if scenario.path_loss_exponent is not None else 3.19
+            return CloseInModel(n=n, sigma_db=scenario.shadowing_std_db)
+        elif key == "cif":
+            n = scenario.path_loss_exponent if scenario.path_loss_exponent is not None else 3.19
+            return CloseInModel(n=n, sigma_db=scenario.shadowing_std_db, use_cif=True, b_cif=0.01)
+        elif key == "abg":
+            return FloatingInterceptABGModel(preset="umi_nlos")
+        elif key == "los_nlos_trans":
+            return StatisticalLoSNLoSTransitionModel(seed=scenario.random_seed, hbs_default=scenario.ht, hut_default=scenario.hr)
+        elif key == "mmwave_umi_los":
+            return MMWave3GPPModel(mode="los", hb_default=scenario.ht, hm_default=scenario.hr)
+        elif key == "mmwave_umi_nlos":
+            return MMWave3GPPModel(mode="nlos", hb_default=scenario.ht, hm_default=scenario.hr)
+        elif key == "mmwave_transition":
+            return MMWave3GPPModel(mode="transition", hb_default=scenario.ht, hm_default=scenario.hr)
+        elif key == "mmwave_ci":
+            return CloseInMMWaveModel(n=scenario.path_loss_exponent if scenario.path_loss_exponent else 2.1)
 
         return cls()
 
@@ -153,7 +213,9 @@ class SimulationEngine:
                 kwargs = {"ht": scenario.ht, "hr": scenario.hr}
             elif model_key in {"okumura", "hata", "cost231"}:
                 kwargs = {"hb": scenario.ht, "hm": scenario.hr, "hte": scenario.ht, "hre": scenario.hr}
-            elif model_key == "shadowing":
+            elif "three_gpp" in model_key or "mmwave" in model_key:
+                kwargs = {"hbs": scenario.ht, "hut": scenario.hr, "hb": scenario.ht, "hm": scenario.hr, "ht": scenario.ht, "hr": scenario.hr}
+            elif model_key in {"shadowing", "los_nlos_trans"}:
                 kwargs = {"seed": scenario.random_seed}
 
             pl = model.calculate_path_loss(
@@ -222,7 +284,9 @@ class SimulationEngine:
                 kwargs = {"ht": scenario.ht, "hr": scenario.hr}
             elif model_key in {"okumura", "hata", "cost231"}:
                 kwargs = {"hb": scenario.ht, "hm": scenario.hr, "hte": scenario.ht, "hre": scenario.hr}
-            elif model_key == "shadowing":
+            elif "three_gpp" in model_key or "mmwave" in model_key:
+                kwargs = {"hbs": scenario.ht, "hut": scenario.hr, "hb": scenario.ht, "hm": scenario.hr, "ht": scenario.ht, "hr": scenario.hr}
+            elif model_key in {"shadowing", "los_nlos_trans"}:
                 kwargs = {"seed": scenario.random_seed}
 
             pl = model.calculate_path_loss(

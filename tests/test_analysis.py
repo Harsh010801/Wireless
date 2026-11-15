@@ -16,7 +16,9 @@ class TestAnalysis:
 
     def test_formal_comparison_table(self):
         df = ModelComparator.get_comparison_table()
-        assert len(df) == 7
+        assert len(df) >= 7
+        assert "Free Space (Friis)" in df["Model"].values
+        assert "3GPP TR 38.901 UMi" in df["Model"].values
         assert "Model" in df.columns
         assert "Main Advantage" in df.columns
         assert "Main Limitation" in df.columns

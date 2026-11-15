@@ -26,6 +26,16 @@ MODEL_PALETTE = {
     "hata": "#9467bd",          # Purple
     "cost231": "#8c564b",       # Brown
     "shadowing": "#e377c2",     # Pink/Magenta
+    "three_gpp_umi_los": "#06b6d4",   # Cyan
+    "three_gpp_umi_nlos": "#e11d48",  # Rose
+    "three_gpp_uma_los": "#0284c7",   # Sky Blue
+    "three_gpp_uma_nlos": "#b91c1c",  # Dark Red
+    "three_gpp_inh_los": "#10b981",   # Emerald
+    "three_gpp_inh_nlos": "#d97706",  # Amber Dark
+    "ci": "#ca8a04",                  # Amber
+    "cif": "#eab308",                 # Yellow Gold
+    "abg": "#4f46e5",                 # Indigo
+    "los_nlos_trans": "#84cc16",      # Lime Green
     "mmwave_umi_los": "#06b6d4",     # Cyan
     "mmwave_umi_nlos": "#e11d48",    # Rose
     "mmwave_transition": "#84cc16",  # Lime Green
@@ -40,6 +50,16 @@ MODEL_LABELS = {
     "hata": "Okumura-Hata",
     "cost231": "COST-231 Hata",
     "shadowing": "Log-Normal Shadowing",
+    "three_gpp_umi_los": "3GPP UMi LoS",
+    "three_gpp_umi_nlos": "3GPP UMi NLoS",
+    "three_gpp_uma_los": "3GPP UMa LoS",
+    "three_gpp_uma_nlos": "3GPP UMa NLoS",
+    "three_gpp_inh_los": "3GPP InH LoS",
+    "three_gpp_inh_nlos": "3GPP InH NLoS",
+    "ci": "Close-In (CI) Model",
+    "cif": "Close-In Freq-Dep (CIF)",
+    "abg": "Floating-Intercept (ABG)",
+    "los_nlos_trans": "LoS-NLoS Transition (IEEE Access)",
     "mmwave_umi_los": "3GPP UMi LoS (mmWave)",
     "mmwave_umi_nlos": "3GPP UMi NLoS (mmWave)",
     "mmwave_transition": "LoS-NLoS Transition (IEEE Access)",
@@ -54,6 +74,16 @@ MODEL_STYLES = {
     "hata": "-",
     "cost231": "--",
     "shadowing": "-",
+    "three_gpp_umi_los": "-",
+    "three_gpp_umi_nlos": "--",
+    "three_gpp_uma_los": "-",
+    "three_gpp_uma_nlos": "--",
+    "three_gpp_inh_los": "-",
+    "three_gpp_inh_nlos": "--",
+    "ci": ":",
+    "cif": "-.",
+    "abg": "-.",
+    "los_nlos_trans": "-",
     "mmwave_umi_los": "-",
     "mmwave_umi_nlos": "--",
     "mmwave_transition": "-.",
